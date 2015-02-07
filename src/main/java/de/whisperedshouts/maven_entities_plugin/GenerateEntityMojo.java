@@ -25,7 +25,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 /**
  * @author mario_000
  * @goal generate-xml
- * @phase process-sources
+ * @phase process-resources
  */
 public class GenerateEntityMojo
     extends AbstractMojo
