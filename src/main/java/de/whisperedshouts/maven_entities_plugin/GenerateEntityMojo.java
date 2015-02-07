@@ -27,61 +27,73 @@ import org.apache.maven.plugin.MojoExecutionException;
  * @goal generate-xml
  * @phase process-resources
  */
-public class GenerateEntityMojo
-    extends AbstractMojo
-{
-    /**
-     * Folder where the XML file shall be stored.
-     * @parameter property="outputDirectory"
-     * @required
-     */
-    private File outputDirectory;
-    
-    
+public class GenerateEntityMojo extends AbstractMojo {
 	/**
-     * Name of the XML file
-     * @parameter property="xmlEntityFile"
-     * @required
-     */
-    private String xmlEntityFile;
-    
-    /**
-     * Full path to a token file
-     * @parameter property="tokenFile"
-     * @required
-     */
-    private File tokenFile;
-    
-    /**
-     * Directory where all XML entities can be found
-     * @parameter property="entityFolder"
-     * @required
-     */
-    private File entityFolder;
+	 * Folder where the XML file shall be stored.
+	 * 
+	 * @parameter property="outputDirectory"
+	 * @required
+	 */
+	private File outputDirectory;
 
-    public void execute()
-        throws MojoExecutionException
-    {
-        if ( !outputDirectory.exists() ){
-        	getLog().debug("created output directory " + outputDirectory);
-        	outputDirectory.mkdirs();
-        }
-        
-        ArrayList<File> fileList = null;
-        if(!entityFolder.exists()){
-        	throw new MojoExecutionException("entity Folder does not exist!");
-        }else {
-        	fileList = new ArrayList<File>();
-        	getLog().debug("traversing directory " + entityFolder);
-        	IIQHelper.traverseDirectory(entityFolder, "xml", fileList);
-        }
+	/**
+	 * Name of the XML file
+	 * 
+	 * @parameter property="xmlEntityFile"
+	 * @required
+	 */
+	private String xmlEntityFile;
 
-        try {
-        	getLog().info("generating deployment XML " + xmlEntityFile);
-			IIQHelper.createDeploymentXml(new File(String.format("%s%s%s", outputDirectory.getAbsolutePath(), System.getProperty("folder.separator"), xmlEntityFile)), fileList, IIQHelper.createTokenMap(tokenFile));
+	/**
+	 * Full path to a token file
+	 * 
+	 * @parameter property="tokenFile"
+	 * @required
+	 */
+	private File tokenFile;
+
+	/**
+	 * Directory where all XML entities can be found
+	 * 
+	 * @parameter property="entityFolder"
+	 * @required
+	 */
+	private File entityFolder;
+
+	/**
+	 * Whether or not to create an import command xml
+	 * 
+	 * @parameter property="createImportCommandXml"
+	 * @required
+	 */
+	private boolean createImportCommandXml;
+
+	public void execute() throws MojoExecutionException {
+		if (!outputDirectory.exists()) {
+			getLog().debug("created output directory " + outputDirectory);
+			outputDirectory.mkdirs();
+		}
+
+		ArrayList<File> fileList = null;
+		if (!entityFolder.exists()) {
+			throw new MojoExecutionException("entity Folder does not exist!");
+		} else {
+			fileList = new ArrayList<File>();
+			getLog().debug("traversing directory " + entityFolder);
+			IIQHelper.traverseDirectory(entityFolder, "xml", fileList);
+		}
+
+		try {
+			getLog().info("generating deployment XML " + xmlEntityFile);
+			IIQHelper.createDeploymentXml(
+					new File(String.format("%s%s%s",
+							outputDirectory.getAbsolutePath(),
+							System.getProperty("folder.separator"),
+							xmlEntityFile)), fileList, IIQHelper
+							.createTokenMap(tokenFile), createImportCommandXml);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    }
+	}
 }

@@ -42,8 +42,8 @@ public class IIQHelper {
 	 * @throws Exception
 	 */
 	public static void createDeploymentXml(File outputFile,
-			ArrayList<File> entityList, TreeMap<String, String> tokens)
-			throws Exception {
+			ArrayList<File> entityList, TreeMap<String, String> tokens,
+			boolean createImportCommandXml) throws Exception {
 		if (logger.isLoggable(Level.FINE)) {
 			logger.entering(IIQHelper.class.getName(), "createDeploymentXml");
 		}
@@ -60,15 +60,29 @@ public class IIQHelper {
 		sw.write(String.format("%s%s", "<sailpoint>",
 				System.getProperty("line.separator")));
 
-		for (File file : entityList) {
-			if (logger.isLoggable(Level.FINEST)) {
-				logger.log(
-						Level.FINEST,
-						String.format("Stripping lines for file %s",
-								file.getName()));
+		if (createImportCommandXml) {
+			for (File file : entityList) {
+				if (logger.isLoggable(Level.FINEST)) {
+					logger.log(Level.FINEST, String.format(
+							"Adding importcommand for file %s", file.getName()));
+				}
+				sw.write(String
+						.format("<ImportAction name='include' value='WEB-INF/config/%s'/>%s",
+								file.getName(),
+								System.getProperty("line.separator")));
 			}
-			stripLines(file, sw, tokens);
+		} else {
+			for (File file : entityList) {
+				if (logger.isLoggable(Level.FINEST)) {
+					logger.log(
+							Level.FINEST,
+							String.format("Stripping lines for file %s",
+									file.getName()));
+				}
+				stripLines(file, sw, tokens);
+			}
 		}
+
 		sw.write("</sailpoint>");
 
 		try {
@@ -276,25 +290,25 @@ public class IIQHelper {
 		}
 
 	}
-	
-	public static TreeMap<String,String> createTokenMap(File tokenFile) {
-		TreeMap<String,String> tokenMap = new TreeMap<String,String>();
-		
+
+	public static TreeMap<String, String> createTokenMap(File tokenFile) {
+		TreeMap<String, String> tokenMap = new TreeMap<String, String>();
+
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new FileReader(tokenFile));
 			String line = null;
-			while((line = br.readLine()) != null) {
-				if(!line.isEmpty()) {
+			while ((line = br.readLine()) != null) {
+				if (!line.isEmpty()) {
 					String[] parts = line.split("=");
 					tokenMap.put(parts[0], parts[1]);
 				}
-				
+
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-		}finally {
-			if(br != null) {
+		} finally {
+			if (br != null) {
 				try {
 					br.close();
 				} catch (IOException e) {
@@ -303,9 +317,8 @@ public class IIQHelper {
 				}
 			}
 		}
-		
-		
+
 		return tokenMap;
-		
+
 	}
 }
