@@ -31,7 +31,7 @@ public class GenerateEntityMojo
     extends AbstractMojo
 {
     /**
-     * Location of the file.
+     * Folder where the XML file shall be stored.
      * @parameter property="outputDirectory"
      * @required
      */
@@ -39,21 +39,21 @@ public class GenerateEntityMojo
     
     
 	/**
-     * Location of the file.
+     * Name of the XML file
      * @parameter property="xmlEntityFile"
      * @required
      */
-    private File xmlEntityFile;
+    private String xmlEntityFile;
     
     /**
-     * Location of the file.
+     * Full path to a token file
      * @parameter property="tokenFile"
      * @required
      */
     private File tokenFile;
     
     /**
-     * Location of the file.
+     * Directory where all XML entities can be found
      * @parameter property="entityFolder"
      * @required
      */
@@ -78,7 +78,7 @@ public class GenerateEntityMojo
 
         try {
         	getLog().info("generating deployment XML " + xmlEntityFile);
-			IIQHelper.createDeploymentXml(xmlEntityFile, fileList, IIQHelper.createTokenMap(tokenFile));
+			IIQHelper.createDeploymentXml(new File(String.format("%s%s%s", outputDirectory.getAbsolutePath(), System.getProperty("folder.separator"), xmlEntityFile)), fileList, IIQHelper.createTokenMap(tokenFile));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
