@@ -27,7 +27,7 @@
   </dependencies>
   <parent>
   	<groupId>de.whisperedshouts</groupId>
-  	<version>1.0.3</version>
+  	<version>1.0.4</version>
   	<artifactId>global-settings</artifactId>
   </parent>
 </project>
