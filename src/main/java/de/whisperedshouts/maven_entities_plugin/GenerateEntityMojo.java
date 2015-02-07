@@ -84,12 +84,14 @@ public class GenerateEntityMojo extends AbstractMojo {
 		}
 
 		try {
-			getLog().info("generating deployment XML " + xmlEntityFile);
+			getLog().info("generating deployment XML: " + xmlEntityFile);
+			File f = new File(String.format("%s%s%s",
+					outputDirectory.getAbsolutePath(),
+					System.getProperty("file.separator"),
+					xmlEntityFile));
+			getLog().info("Full Path: " + f.getAbsolutePath());
 			IIQHelper.createDeploymentXml(
-					new File(String.format("%s%s%s",
-							outputDirectory.getAbsolutePath(),
-							System.getProperty("folder.separator"),
-							xmlEntityFile)), fileList, IIQHelper
+					f, fileList, IIQHelper
 							.createTokenMap(tokenFile), createImportCommandXml);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
