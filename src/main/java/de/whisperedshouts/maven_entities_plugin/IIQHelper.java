@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * a small utility that deploys xml entities to a database
+ * a small helper tool that creates deployable IIQ-XML artifacts
  * 
  * @author Mario Enrico Ragucci <mario@whisperedshouts.de>
  * 
@@ -33,6 +33,7 @@ public class IIQHelper {
 			"<!DOCTYPE [a-zA-Z]* PUBLIC [\"sailpoint.dtd\" ]{1,}>" };
 
 	/**
+	 * Creates a deployable XML artifact
 	 * @param outputFile
 	 *            the output file to be used
 	 * @param entityList
@@ -48,17 +49,12 @@ public class IIQHelper {
 			logger.entering(IIQHelper.class.getName(), "createDeploymentXml");
 		}
 
+		// Initializing
 		BufferedWriter bw = null;
 		StringWriter sw = new StringWriter();
-		sw.write(String.format("%s%s",
-				"<?xml version='1.0' encoding='UTF-8'?>",
-				System.getProperty("line.separator")));
-		sw.write(String
-				.format("%s%s",
-						"<!DOCTYPE sailpoint PUBLIC \"sailpoint.dtd\" \"sailpoint.dtd\">",
-						System.getProperty("line.separator")));
-		sw.write(String.format("%s%s", "<sailpoint>",
-				System.getProperty("line.separator")));
+		
+		
+		writeXmlHeader(sw);
 
 		if (createImportCommandXml) {
 			for (File file : entityList) {
@@ -83,7 +79,7 @@ public class IIQHelper {
 			}
 		}
 
-		sw.write("</sailpoint>");
+		writeXmlFooter(sw);
 
 		try {
 			if (logger.isLoggable(Level.FINE)) {
@@ -111,15 +107,57 @@ public class IIQHelper {
 			logger.exiting(IIQHelper.class.getName(), "createDeploymentXml");
 		}
 	}
+	
+	/**
+	 * Writes a standard header and an opened root element to the supplied StringWriter
+	 * @param writer
+	 */
+	private static void writeXmlHeader(StringWriter writer) {
+		if (logger.isLoggable(Level.FINE)) {
+			logger.entering(IIQHelper.class.getName(), "writeXmlHeader");
+		}
+		
+		writer.write(String.format("%s%s",
+				"<?xml version='1.0' encoding='UTF-8'?>",
+				System.getProperty("line.separator")));
+		writer.write(String
+				.format("%s%s",
+						"<!DOCTYPE sailpoint PUBLIC \"sailpoint.dtd\" \"sailpoint.dtd\">",
+						System.getProperty("line.separator")));
+		writer.write(String.format("%s%s", "<sailpoint>",
+				System.getProperty("line.separator")));
+		
+		if (logger.isLoggable(Level.FINE)) {
+			logger.exiting(IIQHelper.class.getName(), "writeXmlHeader");
+		}
+	}
 
 	/**
+	 * Writes a standard footer that closes the opened root element to the supplied StringWriter
+	 * @param writer
+	 */
+	private static void writeXmlFooter(StringWriter writer) {
+		if (logger.isLoggable(Level.FINE)) {
+			logger.entering(IIQHelper.class.getName(), "writeXmlFooter");
+		}
+		
+		writer.write("</sailpoint>");
+		
+		if (logger.isLoggable(Level.FINE)) {
+			logger.exiting(IIQHelper.class.getName(), "writeXmlFooter");
+		}
+	}
+
+
+	/**
+	 * Strips some unwanted Attributes (id, created, modified)
 	 * @param line
 	 *            the line to be checked
 	 * @return
 	 */
-	private static String stripIds(String line) {
+	private static String stripAttributes(String line) {
 		if (logger.isLoggable(Level.FINE)) {
-			logger.entering(IIQHelper.class.getName(), "stripIds");
+			logger.entering(IIQHelper.class.getName(), "stripAttributes");
 		}
 
 		String regex = "(id|created|modified)=[\"']\\w+[\"']";
@@ -147,12 +185,13 @@ public class IIQHelper {
 		}
 
 		if (logger.isLoggable(Level.FINE)) {
-			logger.exiting(IIQHelper.class.getName(), "stripIds");
+			logger.exiting(IIQHelper.class.getName(), "stripAttributes");
 		}
 		return line;
 	}
 
 	/**
+	 * Strips some lines from the file that we do not want to include
 	 * @param file
 	 *            the file to be used
 	 * @param writer
@@ -187,7 +226,7 @@ public class IIQHelper {
 					if (logger.isLoggable(Level.FINE)) {
 						logger.log(Level.FINE, "stripping ids");
 					}
-					String allowed = stripIds(String.format("%s%s", line,
+					String allowed = stripAttributes(String.format("%s%s", line,
 							System.getProperty("line.separator")));
 
 					String regex = "@@@[a-zA-Z0-9-_]*@@@";
@@ -240,6 +279,7 @@ public class IIQHelper {
 	}
 
 	/**
+	 * It traverses a Directory and returns the supplied ArrayList containing matching files
 	 * @param pathObject
 	 *            the path to be used
 	 * @param allowedExtension
@@ -292,9 +332,14 @@ public class IIQHelper {
 	}
 
 	public static TreeMap<String, String> createTokenMap(File tokenFile) {
+		if (logger.isLoggable(Level.FINE)) {
+			logger.entering(IIQHelper.class.getName(), "createTokenMap");
+		}
+		
+		// Initializing
 		TreeMap<String, String> tokenMap = new TreeMap<String, String>();
-
 		BufferedReader br = null;
+		
 		try {
 			br = new BufferedReader(new FileReader(tokenFile));
 			String line = null;
@@ -318,7 +363,10 @@ public class IIQHelper {
 			}
 		}
 
+		if (logger.isLoggable(Level.FINE)) {
+			logger.exiting(IIQHelper.class.getName(), "createTokenMap");
+		}
+		
 		return tokenMap;
-
 	}
 }

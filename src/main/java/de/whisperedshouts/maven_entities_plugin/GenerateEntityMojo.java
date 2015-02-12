@@ -64,11 +64,17 @@ public class GenerateEntityMojo extends AbstractMojo {
 	 * Whether or not to create an import command xml
 	 * 
 	 * @parameter property="createImportCommandXml"
-	 * @required
+	 * 			  default-value=false
 	 */
 	private boolean createImportCommandXml;
 
 	public void execute() throws MojoExecutionException {
+		getLog().debug(String.format("Value of Property %s : %s", "outputDirectory", outputDirectory));
+		getLog().debug(String.format("Value of Property %s : %s", "xmlEntityFile", xmlEntityFile));
+		getLog().debug(String.format("Value of Property %s : %s", "tokenFile", tokenFile));
+		getLog().debug(String.format("Value of Property %s : %s", "entityFolder", entityFolder));
+		getLog().debug(String.format("Value of Property %s : %s", "createImportCommandXml", createImportCommandXml));
+		
 		if (!outputDirectory.exists()) {
 			getLog().debug("created output directory " + outputDirectory);
 			outputDirectory.mkdirs();
@@ -94,8 +100,7 @@ public class GenerateEntityMojo extends AbstractMojo {
 					f, fileList, IIQHelper
 							.createTokenMap(tokenFile), createImportCommandXml);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			getLog().error(e);
 		}
 	}
 }
