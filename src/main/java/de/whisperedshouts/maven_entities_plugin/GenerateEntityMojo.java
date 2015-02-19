@@ -23,14 +23,14 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
- * @author mario_000
+ * @author Mario Enrico Ragucci <mario@whisperedshouts.de>
  * @goal generate-xml
  * @phase process-resources
  */
 public class GenerateEntityMojo extends AbstractMojo {
 	/**
 	 * Folder where the XML file shall be stored.
-	 * 
+	 *
 	 * @parameter property="outputDirectory"
 	 * @required
 	 */
@@ -38,7 +38,7 @@ public class GenerateEntityMojo extends AbstractMojo {
 
 	/**
 	 * Name of the XML file
-	 * 
+	 *
 	 * @parameter property="xmlEntityFile"
 	 * @required
 	 */
@@ -46,7 +46,7 @@ public class GenerateEntityMojo extends AbstractMojo {
 
 	/**
 	 * Full path to a token file
-	 * 
+	 *
 	 * @parameter property="tokenFile"
 	 * @required
 	 */
@@ -54,7 +54,7 @@ public class GenerateEntityMojo extends AbstractMojo {
 
 	/**
 	 * Directory where all XML entities can be found
-	 * 
+	 *
 	 * @parameter property="entityFolder"
 	 * @required
 	 */
@@ -62,7 +62,7 @@ public class GenerateEntityMojo extends AbstractMojo {
 
 	/**
 	 * Whether or not to create an import command xml
-	 * 
+	 *
 	 * @parameter property="createImportCommandXml"
 	 * 			  default-value=false
 	 */
@@ -74,7 +74,7 @@ public class GenerateEntityMojo extends AbstractMojo {
 		getLog().debug(String.format("Value of Property %s : %s", "tokenFile", tokenFile));
 		getLog().debug(String.format("Value of Property %s : %s", "entityFolder", entityFolder));
 		getLog().debug(String.format("Value of Property %s : %s", "createImportCommandXml", createImportCommandXml));
-		
+
 		if (!outputDirectory.exists()) {
 			getLog().debug("created output directory " + outputDirectory);
 			outputDirectory.mkdirs();

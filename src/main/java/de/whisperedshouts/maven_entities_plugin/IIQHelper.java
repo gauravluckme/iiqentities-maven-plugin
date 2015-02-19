@@ -1,7 +1,20 @@
-/**
- * 
- */
 package de.whisperedshouts.maven_entities_plugin;
+
+/*
+ * Copyright 2001-2005 The Apache Software Foundation.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,9 +34,9 @@ import java.util.regex.Pattern;
 
 /**
  * a small helper tool that creates deployable IIQ-XML artifacts
- * 
+ *
  * @author Mario Enrico Ragucci <mario@whisperedshouts.de>
- * 
+ *
  */
 public class IIQHelper {
 	private final static Logger logger = Logger.getLogger(IIQHelper.class
@@ -52,8 +65,8 @@ public class IIQHelper {
 		// Initializing
 		BufferedWriter bw = null;
 		StringWriter sw = new StringWriter();
-		
-		
+
+
 		writeXmlHeader(sw);
 
 		if (createImportCommandXml) {
@@ -107,7 +120,7 @@ public class IIQHelper {
 			logger.exiting(IIQHelper.class.getName(), "createDeploymentXml");
 		}
 	}
-	
+
 	/**
 	 * Writes a standard header and an opened root element to the supplied StringWriter
 	 * @param writer
@@ -116,7 +129,7 @@ public class IIQHelper {
 		if (logger.isLoggable(Level.FINE)) {
 			logger.entering(IIQHelper.class.getName(), "writeXmlHeader");
 		}
-		
+
 		writer.write(String.format("%s%s",
 				"<?xml version='1.0' encoding='UTF-8'?>",
 				System.getProperty("line.separator")));
@@ -126,7 +139,7 @@ public class IIQHelper {
 						System.getProperty("line.separator")));
 		writer.write(String.format("%s%s", "<sailpoint>",
 				System.getProperty("line.separator")));
-		
+
 		if (logger.isLoggable(Level.FINE)) {
 			logger.exiting(IIQHelper.class.getName(), "writeXmlHeader");
 		}
@@ -140,9 +153,9 @@ public class IIQHelper {
 		if (logger.isLoggable(Level.FINE)) {
 			logger.entering(IIQHelper.class.getName(), "writeXmlFooter");
 		}
-		
+
 		writer.write("</sailpoint>");
-		
+
 		if (logger.isLoggable(Level.FINE)) {
 			logger.exiting(IIQHelper.class.getName(), "writeXmlFooter");
 		}
@@ -335,11 +348,11 @@ public class IIQHelper {
 		if (logger.isLoggable(Level.FINE)) {
 			logger.entering(IIQHelper.class.getName(), "createTokenMap");
 		}
-		
+
 		// Initializing
 		TreeMap<String, String> tokenMap = new TreeMap<String, String>();
 		BufferedReader br = null;
-		
+
 		try {
 			br = new BufferedReader(new FileReader(tokenFile));
 			String line = null;
@@ -366,7 +379,7 @@ public class IIQHelper {
 		if (logger.isLoggable(Level.FINE)) {
 			logger.exiting(IIQHelper.class.getName(), "createTokenMap");
 		}
-		
+
 		return tokenMap;
 	}
 }
