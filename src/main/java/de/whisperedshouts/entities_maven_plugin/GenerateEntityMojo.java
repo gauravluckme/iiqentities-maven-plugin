@@ -1,4 +1,4 @@
-package de.whisperedshouts.maven_entities_plugin;
+package de.whisperedshouts.entities_maven_plugin;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -17,6 +17,7 @@ package de.whisperedshouts.maven_entities_plugin;
  */
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -31,7 +32,8 @@ public class GenerateEntityMojo extends AbstractMojo {
 	/**
 	 * Folder where the XML file shall be stored.
 	 *
-	 * @parameter property="outputDirectory"
+	 * @parameter 	property="outputDirectory"
+	 * 				expression=${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/config/custom-artifacts
 	 * @required
 	 */
 	private File outputDirectory;
@@ -48,7 +50,6 @@ public class GenerateEntityMojo extends AbstractMojo {
 	 * Full path to a token file
 	 *
 	 * @parameter property="tokenFile"
-	 * @required
 	 */
 	private File tokenFile;
 
@@ -78,6 +79,17 @@ public class GenerateEntityMojo extends AbstractMojo {
 		if (!outputDirectory.exists()) {
 			getLog().debug("created output directory " + outputDirectory);
 			outputDirectory.mkdirs();
+		}
+		
+		if(tokenFile == null || tokenFile.exists()) {
+			// creating an empty temp file so that IIQHelper does not break
+			try {
+				tokenFile = File.createTempFile("iiq", "token");
+				tokenFile.deleteOnExit();
+				getLog().debug(String.format("Created %s as a temporary file", tokenFile.getAbsolutePath()));
+			} catch (IOException e) {
+				getLog().error(e);
+			}
 		}
 
 		ArrayList<File> fileList = null;
