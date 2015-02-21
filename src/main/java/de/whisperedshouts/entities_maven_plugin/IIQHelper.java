@@ -371,7 +371,7 @@ public class IIQHelper {
 					br.close();
 				} catch (IOException e) {
 					// We died. What else could we do?
-					e.printStackTrace();
+					logger.log(Level.SEVERE, e.getMessage());
 				}
 			}
 		}
