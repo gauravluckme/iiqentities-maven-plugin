@@ -1,4 +1,4 @@
-package de.whisperedshouts.entities_maven_plugin;
+package de.whisperedshouts.plugins.iiqentities;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -28,7 +28,7 @@ import org.apache.maven.plugin.MojoExecutionException;
  * @goal generate-xml
  * @phase process-resources
  */
-public class GenerateEntityMojo extends AbstractMojo {
+public class GenerateIIQEntityMojo extends AbstractMojo {
 	/**
 	 * Folder where the XML file shall be stored.
 	 *

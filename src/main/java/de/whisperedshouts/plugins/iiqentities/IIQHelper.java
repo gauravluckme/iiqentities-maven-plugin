@@ -1,4 +1,4 @@
-package de.whisperedshouts.entities_maven_plugin;
+package de.whisperedshouts.plugins.iiqentities;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
