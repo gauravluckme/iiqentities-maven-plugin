@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 /**
  * a small helper tool that creates deployable IIQ-XML artifacts
  *
- * @author Mario Enrico Ragucci <mario@whisperedshouts.de>
+ * @author Mario Enrico Ragucci, mario@whisperedshouts.de
  *
  */
 public class IIQHelper {
@@ -53,7 +53,7 @@ public class IIQHelper {
 	 *            the list of entities
 	 * @param tokens
 	 *            the map of tokens
-	 * @throws Exception
+	 * @throws Exception thrown when there is an exception
 	 */
 	public static void createDeploymentXml(File outputFile,
 			ArrayList<File> entityList, TreeMap<String, String> tokens,
@@ -167,6 +167,7 @@ public class IIQHelper {
 	 * @param line
 	 *            the line to be checked
 	 * @return
+	 * 			  the line stripped from the unwanted attributes
 	 */
 	private static String stripAttributes(String line) {
 		if (logger.isLoggable(Level.FINE)) {
@@ -211,7 +212,7 @@ public class IIQHelper {
 	 *            a Writer object
 	 * @param tokens
 	 *            a map of tokens
-	 * @throws Exception
+	 * @throws Exception thrown when there is an exception
 	 */
 	private static void stripLines(File file, Writer writer,
 			TreeMap<String, String> tokens) throws Exception {

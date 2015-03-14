@@ -24,7 +24,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
- * @author Mario Enrico Ragucci <mario@whisperedshouts.de>
+ * @author Mario Enrico Ragucci, mario@whisperedshouts.de
  * @goal generate-xml
  * @phase process-resources
  */
