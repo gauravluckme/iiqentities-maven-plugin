@@ -123,7 +123,7 @@ public class IIQHelper {
 
 	/**
 	 * Writes a standard header and an opened root element to the supplied StringWriter
-	 * @param writer
+	 * @param writer the {@link StringWriter} to be used
 	 */
 	private static void writeXmlHeader(StringWriter writer) {
 		if (logger.isLoggable(Level.FINE)) {
@@ -147,7 +147,7 @@ public class IIQHelper {
 
 	/**
 	 * Writes a standard footer that closes the opened root element to the supplied StringWriter
-	 * @param writer
+	 * @param writer the {@link StringWriter} to be used 
 	 */
 	private static void writeXmlFooter(StringWriter writer) {
 		if (logger.isLoggable(Level.FINE)) {
@@ -293,7 +293,7 @@ public class IIQHelper {
 	}
 
 	/**
-	 * It traverses a Directory and returns the supplied ArrayList containing matching files
+	 * traverses a Directory and returns the supplied ArrayList containing matching files
 	 * @param pathObject
 	 *            the path to be used
 	 * @param allowedExtension
@@ -345,6 +345,11 @@ public class IIQHelper {
 
 	}
 
+	/**
+	 * Creates a {@link TreeMap} with tokens taken from the supplied tokenFile
+	 * @param tokenFile a {@link File} containing tokens (key=value)
+	 * @return a {@link TreeMap} containing tokens
+	 */
 	public static TreeMap<String, String> createTokenMap(File tokenFile) {
 		if (logger.isLoggable(Level.FINE)) {
 			logger.entering(IIQHelper.class.getName(), "createTokenMap");

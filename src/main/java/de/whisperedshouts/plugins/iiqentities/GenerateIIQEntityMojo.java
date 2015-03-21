@@ -69,6 +69,9 @@ public class GenerateIIQEntityMojo extends AbstractMojo {
 	 */
 	private boolean createImportCommandXml;
 
+	/* (non-Javadoc)
+	 * @see org.apache.maven.plugin.Mojo#execute()
+	 */
 	public void execute() throws MojoExecutionException {
 		getLog().debug(String.format("Value of Property %s : %s", "outputDirectory", outputDirectory));
 		getLog().debug(String.format("Value of Property %s : %s", "xmlEntityFile", xmlEntityFile));
@@ -81,12 +84,12 @@ public class GenerateIIQEntityMojo extends AbstractMojo {
 			outputDirectory.mkdirs();
 		}
 		
-		if(tokenFile == null || tokenFile.exists()) {
+		if(tokenFile == null || !tokenFile.exists()) {
 			// creating an empty temp file so that IIQHelper does not break
 			try {
 				tokenFile = File.createTempFile("iiq", "token");
 				tokenFile.deleteOnExit();
-				getLog().debug(String.format("Created %s as a temporary file", tokenFile.getAbsolutePath()));
+				getLog().info(String.format("Created %s as a temporary file", tokenFile.getAbsolutePath()));
 			} catch (IOException e) {
 				getLog().error(e);
 			}
