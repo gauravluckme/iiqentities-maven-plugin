@@ -19,12 +19,15 @@ package de.whisperedshouts.plugins.iiqentities;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -42,7 +45,7 @@ public class IIQHelper {
 	private final static Logger logger = Logger.getLogger(IIQHelper.class
 			.getName());
 
-	public static String[] stripLineRegex = { "<\\?xml[ a-zA-Z0-9=\"'.-]*\\?>",
+	private final static String[] stripLineRegex = { "<\\?xml[ a-zA-Z0-9=\"'.-]*\\?>",
 			"<!DOCTYPE [a-zA-Z]* PUBLIC [\"sailpoint.dtd\" ]{1,}>" };
 
 	/**
@@ -99,7 +102,8 @@ public class IIQHelper {
 				logger.log(Level.FINE,
 						"Creating BufferedWriter and writing file");
 			}
-			bw = new BufferedWriter(new FileWriter(outputFile));
+			//bw = new BufferedWriter(new FileWriter(outputFile));
+			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), Charset.forName("UTF-8")));
 			bw.write(sw.toString());
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, e.getMessage());
@@ -226,7 +230,8 @@ public class IIQHelper {
 				logger.log(Level.FINE, String.format(
 						"Creating BufferedReader of file %s", file.getName()));
 			}
-			br = new BufferedReader(new FileReader(file));
+			//br = new BufferedReader(new FileReader(file));
+			br = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")));
 			String line;
 			while ((line = br.readLine()) != null) {
 				boolean allowedLine = true;
@@ -317,23 +322,33 @@ public class IIQHelper {
 			if (logger.isLoggable(Level.FINE)) {
 				logger.log(Level.FINE, "Iterating files");
 			}
-			for (File file : files) {
-				if (file.isDirectory()) {
-					if (logger.isLoggable(Level.FINE)) {
-						logger.log(Level.FINE, String.format(
-								"%s is a directory, starting recursion",
-								file.getName()));
-					}
-					traverseDirectory(file, allowedExtension, fileList);
-				} else {
-
-					if (file.getName().endsWith(allowedExtension)) {
+			if(files != null) {
+				for (File file : files) {
+					if (file.isDirectory()) {
 						if (logger.isLoggable(Level.FINE)) {
 							logger.log(Level.FINE, String.format(
-									"%s is a file, adding to list",
+									"%s is a directory, starting recursion",
 									file.getName()));
 						}
-						fileList.add(file);
+						traverseDirectory(file, allowedExtension, fileList);
+					} else {
+
+						if (file.getName().endsWith(allowedExtension)) {
+							if (logger.isLoggable(Level.FINE)) {
+								logger.log(Level.FINE, String.format(
+										"%s is a file, adding to list",
+										file.getName()));
+							}
+							if(fileList == null) {
+								if (logger.isLoggable(Level.FINE)) {
+									logger.log(Level.FINE, String.format(
+											"%s is currently null, which should not happen. Creating a new instance",
+											"fileList"));
+								}
+								fileList = new ArrayList<File>();
+							}
+							fileList.add(file);
+						}
 					}
 				}
 			}
@@ -360,7 +375,8 @@ public class IIQHelper {
 		BufferedReader br = null;
 
 		try {
-			br = new BufferedReader(new FileReader(tokenFile));
+			//br = new BufferedReader(new FileReader(tokenFile));
+			br = new BufferedReader(new InputStreamReader(new FileInputStream(tokenFile), Charset.forName("UTF-8")));
 			String line = null;
 			while ((line = br.readLine()) != null) {
 				if (!line.isEmpty()) {

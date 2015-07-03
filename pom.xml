@@ -177,6 +177,20 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+	<reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>3.0.1</version>
+        <configuration>
+          <xmlOutput>true</xmlOutput>
+          <!-- Optional directory to put findbugs xdoc xml report -->
+          <xmlOutputDirectory>target/site</xmlOutputDirectory>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
 	<properties>
 		<compiler.source.version>1.8</compiler.source.version>
 		<compiler.target.version>1.8</compiler.target.version>

@@ -73,15 +73,18 @@ public class GenerateIIQEntityMojo extends AbstractMojo {
 	 * @see org.apache.maven.plugin.Mojo#execute()
 	 */
 	public void execute() throws MojoExecutionException {
-		getLog().debug(String.format("Value of Property %s : %s", "outputDirectory", outputDirectory));
-		getLog().debug(String.format("Value of Property %s : %s", "xmlEntityFile", xmlEntityFile));
-		getLog().debug(String.format("Value of Property %s : %s", "tokenFile", tokenFile));
-		getLog().debug(String.format("Value of Property %s : %s", "entityFolder", entityFolder));
+		getLog().debug(String.format("Value of Property %s : %s", "outputDirectory", (outputDirectory == null)? "NULL" : outputDirectory));
+		getLog().debug(String.format("Value of Property %s : %s", "xmlEntityFile", (xmlEntityFile == null)? "NULL" : xmlEntityFile));
+		getLog().debug(String.format("Value of Property %s : %s", "tokenFile", (tokenFile == null)? "NULL" : tokenFile));
+		getLog().debug(String.format("Value of Property %s : %s", "entityFolder", (entityFolder == null)? "NULL" : entityFolder));
 		getLog().debug(String.format("Value of Property %s : %s", "createImportCommandXml", createImportCommandXml));
 
 		if (!outputDirectory.exists()) {
 			getLog().debug("created output directory " + outputDirectory);
-			outputDirectory.mkdirs();
+			boolean dirCreated = outputDirectory.mkdirs();
+			if(!dirCreated) {
+				throw new MojoExecutionException(String.format("Directory %s does not exist and could not be created.", outputDirectory.getAbsoluteFile()));
+			}
 		}
 		
 		if(tokenFile == null || !tokenFile.exists()) {
@@ -92,11 +95,13 @@ public class GenerateIIQEntityMojo extends AbstractMojo {
 				getLog().info(String.format("Created %s as a temporary file", tokenFile.getAbsolutePath()));
 			} catch (IOException e) {
 				getLog().error(e);
+				throw new MojoExecutionException(e.getMessage(), e);
 			}
 		}
 
 		ArrayList<File> fileList = null;
-		if (!entityFolder.exists()) {
+		if (entityFolder != null
+				&& !entityFolder.exists()) {
 			throw new MojoExecutionException("entity Folder does not exist!");
 		} else {
 			fileList = new ArrayList<File>();
