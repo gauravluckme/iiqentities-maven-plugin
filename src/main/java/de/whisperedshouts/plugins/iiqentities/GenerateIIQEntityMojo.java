@@ -117,7 +117,10 @@ public class GenerateIIQEntityMojo extends AbstractMojo {
 					xmlEntityFile));
 			getLog().info("Full Path: " + f.getAbsolutePath());
 			IIQHelper.createDeploymentXml(
-					f, fileList, IIQHelper
+					f, 
+					fileList, 
+					entityFolder.getAbsolutePath().toString(),
+					IIQHelper
 							.createTokenMap(tokenFile), createImportCommandXml);
 		} catch (Exception e) {
 			getLog().error(e);

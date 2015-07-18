@@ -42,11 +42,22 @@ import java.util.regex.Pattern;
  *
  */
 public class IIQHelper {
+    // A logger. Not much to say about this one
 	private final static Logger logger = Logger.getLogger(IIQHelper.class
 			.getName());
 
-	private final static String[] stripLineRegex = { "<\\?xml[ a-zA-Z0-9=\"'.-]*\\?>",
-			"<!DOCTYPE [a-zA-Z]* PUBLIC [\"sailpoint.dtd\" ]{1,}>" };
+	// These regular expressions are used to strip whole lines from a given file
+	private final static String[] stripLineRegex    = { 
+	        "<\\?xml[ a-zA-Z0-9=\"'.-]*\\?>",
+			"<!DOCTYPE [a-zA-Z]* PUBLIC [\"sailpoint.dtd\" ]{1,}>" 
+	        };
+	
+	// This regular expression is used to remove certain attribute/value pairs
+	// from the given line.
+	private final static String stripAttributeRegex = "(id|created|modified)=[\"']\\w+[\"']";
+	
+	// This regular expression is used to find tokens in a string.
+    private static final String tokenRegex          = "@@@[a-zA-Z0-9-_]*@@@";;
 
 	/**
 	 * Creates a deployable XML artifact
@@ -59,7 +70,9 @@ public class IIQHelper {
 	 * @throws Exception thrown when there is an exception
 	 */
 	public static void createDeploymentXml(File outputFile,
-			ArrayList<File> entityList, TreeMap<String, String> tokens,
+			ArrayList<File> entityList, 
+			String baseDirectory, 
+			TreeMap<String, String> tokens,
 			boolean createImportCommandXml) throws Exception {
 		if (logger.isLoggable(Level.FINE)) {
 			logger.entering(IIQHelper.class.getName(), "createDeploymentXml");
@@ -69,18 +82,21 @@ public class IIQHelper {
 		BufferedWriter bw = null;
 		StringWriter sw = new StringWriter();
 
-
+		// Write a standard XML header to our file
 		writeXmlHeader(sw);
 
+		// We want to create an import file instead of concatenating it to a deployable file
 		if (createImportCommandXml) {
+		    // Doing this for every file we of our configuration files
 			for (File file : entityList) {
 				if (logger.isLoggable(Level.FINEST)) {
 					logger.log(Level.FINEST, String.format(
 							"Adding importcommand for file %s", file.getName()));
 				}
+				// TODO: Make sure if we head down this road, we need to copy ALL the files!
 				sw.write(String
-						.format("<ImportAction name='include' value='WEB-INF/config/%s'/>%s",
-								file.getName(),
+						.format("<ImportAction name='include' value='WEB-INF/config/custom-artifacts%s'/>%s",
+								file.getAbsoluteFile().toString().replaceAll(baseDirectory, ""),
 								System.getProperty("line.separator")));
 			}
 		} else {
@@ -102,7 +118,6 @@ public class IIQHelper {
 				logger.log(Level.FINE,
 						"Creating BufferedWriter and writing file");
 			}
-			//bw = new BufferedWriter(new FileWriter(outputFile));
 			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), Charset.forName("UTF-8")));
 			bw.write(sw.toString());
 		} catch (IOException e) {
@@ -178,12 +193,12 @@ public class IIQHelper {
 			logger.entering(IIQHelper.class.getName(), "stripAttributes");
 		}
 
-		String regex = "(id|created|modified)=[\"']\\w+[\"']";
+		
 		if (logger.isLoggable(Level.FINE)) {
 			logger.log(Level.FINE, String.format(
-					"Creating pattern matcher with regex %s", regex));
+					"Creating pattern matcher with regex %s", IIQHelper.stripAttributeRegex));
 		}
-		Pattern p = Pattern.compile(regex);
+		Pattern p = Pattern.compile(IIQHelper.stripAttributeRegex);
 		Matcher m = p.matcher(line);
 
 		if (logger.isLoggable(Level.FINE)) {
@@ -230,7 +245,6 @@ public class IIQHelper {
 				logger.log(Level.FINE, String.format(
 						"Creating BufferedReader of file %s", file.getName()));
 			}
-			//br = new BufferedReader(new FileReader(file));
 			br = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")));
 			String line;
 			while ((line = br.readLine()) != null) {
@@ -248,15 +262,15 @@ public class IIQHelper {
 					String allowed = stripAttributes(String.format("%s%s", line,
 							System.getProperty("line.separator")));
 
-					String regex = "@@@[a-zA-Z0-9-_]*@@@";
+					
 					if (logger.isLoggable(Level.FINE)) {
 						logger.log(
 								Level.FINE,
 								String.format(
 										"Creating pattern matcher with regex %s",
-										regex));
+										IIQHelper.tokenRegex));
 					}
-					Pattern p = Pattern.compile(regex);
+					Pattern p = Pattern.compile(IIQHelper.tokenRegex);
 					Matcher m = p.matcher(allowed);
 					while (m.find()) {
 						String token = m.group();
@@ -375,7 +389,6 @@ public class IIQHelper {
 		BufferedReader br = null;
 
 		try {
-			//br = new BufferedReader(new FileReader(tokenFile));
 			br = new BufferedReader(new InputStreamReader(new FileInputStream(tokenFile), Charset.forName("UTF-8")));
 			String line = null;
 			while ((line = br.readLine()) != null) {
