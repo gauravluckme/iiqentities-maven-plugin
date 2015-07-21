@@ -93,10 +93,10 @@ public class IIQHelper {
 					logger.log(Level.FINEST, String.format(
 							"Adding importcommand for file %s", file.getName()));
 				}
-				// TODO: Make sure if we head down this road, we need to copy ALL the files!
 				sw.write(String
-						.format("<ImportAction name='include' value='WEB-INF/config/custom-artifacts%s'/>%s",
-								file.getAbsoluteFile().toString().replaceAll(baseDirectory, ""),
+						.format("<ImportAction name='include' value='WEB-INF/config/custom-artifacts/%s'/>%s",
+								file.getAbsoluteFile().toString().replaceAll(
+								        String.format("%s/", baseDirectory), ""),
 								System.getProperty("line.separator")));
 			}
 		} else {
@@ -122,6 +122,7 @@ public class IIQHelper {
 			bw.write(sw.toString());
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, e.getMessage());
+			throw new IOException(e);
 		} finally {
 			if (logger.isLoggable(Level.FINE)) {
 				logger.log(Level.FINE, "Trying to close BufferedWriter");
@@ -130,6 +131,7 @@ public class IIQHelper {
 				try {
 					bw.close();
 				} catch (IOException e) {
+				    logger.log(Level.SEVERE, e.getMessage());
 					throw new Exception(e);
 				}
 			}
@@ -378,8 +380,9 @@ public class IIQHelper {
 	 * Creates a {@link TreeMap} with tokens taken from the supplied tokenFile
 	 * @param tokenFile a {@link File} containing tokens (key=value)
 	 * @return a {@link TreeMap} containing tokens
+	 * @throws Exception if anything cannot be caught correct
 	 */
-	public static TreeMap<String, String> createTokenMap(File tokenFile) {
+	public static TreeMap<String, String> createTokenMap(File tokenFile) throws Exception {
 		if (logger.isLoggable(Level.FINE)) {
 			logger.entering(IIQHelper.class.getName(), "createTokenMap");
 		}
@@ -399,7 +402,8 @@ public class IIQHelper {
 
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+		    logger.log(Level.SEVERE, e.getMessage());
+		    throw new Exception(e);
 		} finally {
 			if (br != null) {
 				try {
@@ -407,6 +411,7 @@ public class IIQHelper {
 				} catch (IOException e) {
 					// We died. What else could we do?
 					logger.log(Level.SEVERE, e.getMessage());
+					throw new IOException(e);
 				}
 			}
 		}
