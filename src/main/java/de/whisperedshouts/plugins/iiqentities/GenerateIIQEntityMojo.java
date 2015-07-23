@@ -61,33 +61,33 @@ public class GenerateIIQEntityMojo extends AbstractMojo {
 	 */
 	private File entityFolder;
 
-	/**
-	 * Whether or not to create an import command xml
-	 *
-	 * @parameter property="createImportCommandXml"
-	 * 			  default-value=false
-	 */
-	private boolean createImportCommandXml;
-
 	/* (non-Javadoc)
 	 * @see org.apache.maven.plugin.Mojo#execute()
 	 */
 	public void execute() throws MojoExecutionException {
+	    // Some debugging output
 		getLog().debug(String.format("Value of Property %s : %s", "outputDirectory", (outputDirectory == null)? "NULL" : outputDirectory));
 		getLog().debug(String.format("Value of Property %s : %s", "xmlEntityFile", (xmlEntityFile == null)? "NULL" : xmlEntityFile));
 		getLog().debug(String.format("Value of Property %s : %s", "tokenFile", (tokenFile == null)? "NULL" : tokenFile));
 		getLog().debug(String.format("Value of Property %s : %s", "entityFolder", (entityFolder == null)? "NULL" : entityFolder));
-		getLog().debug(String.format("Value of Property %s : %s", "createImportCommandXml", createImportCommandXml));
-
+		
+		// Check if the output directory already exists
+		// If it does not, we are creating it.
 		if (!outputDirectory.exists()) {
 			getLog().debug("created output directory " + outputDirectory);
 			boolean dirCreated = outputDirectory.mkdirs();
+			
+			// If directory creation had not been successfull, we throw a new exception
 			if(!dirCreated) {
-				throw new MojoExecutionException(String.format("Directory %s does not exist and could not be created.", outputDirectory.getAbsoluteFile()));
+				throw new MojoExecutionException(String.format(
+				        "Directory %s does not exist and could not be created.", 
+				        outputDirectory.getAbsoluteFile()));
 			}
 		}
 		
+		// Check if the tokenFile is available to us
 		if(tokenFile == null || !tokenFile.exists()) {
+		    
 			// creating an empty temp file so that IIQHelper does not break
 			try {
 				tokenFile = File.createTempFile("iiq", "token");
@@ -99,16 +99,22 @@ public class GenerateIIQEntityMojo extends AbstractMojo {
 			}
 		}
 
+		// Initializing the list of files we are going to process
 		ArrayList<File> fileList = null;
+		// Check if the config folder exists. If not we throw a new exception
 		if (entityFolder != null
 				&& !entityFolder.exists()) {
 			throw new MojoExecutionException("entity Folder does not exist!");
-		} else {
+		} 
+		// But if it does, we add all files to the list
+		else {
 			fileList = new ArrayList<File>();
 			getLog().debug("traversing directory " + entityFolder);
 			IIQHelper.traverseDirectory(entityFolder, "xml", fileList);
 		}
 
+		// After the list of files has been populated we are going to create
+		// the XML file that will contain the import instructions
 		try {
 			getLog().info("generating deployment XML: " + xmlEntityFile);
 			File f = new File(String.format("%s%s%s",
@@ -116,12 +122,13 @@ public class GenerateIIQEntityMojo extends AbstractMojo {
 					System.getProperty("file.separator"),
 					xmlEntityFile));
 			getLog().info("Full Path: " + f.getAbsolutePath());
+			
+			// Actually does the stuff...
 			IIQHelper.createDeploymentXml(
 					f, 
 					fileList, 
 					entityFolder.getAbsolutePath().toString(),
-					IIQHelper
-							.createTokenMap(tokenFile), createImportCommandXml);
+					IIQHelper.createTokenMap(tokenFile));
 		} catch (Exception e) {
 			getLog().error(e);
 		}

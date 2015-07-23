@@ -22,12 +22,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -72,8 +76,7 @@ public class IIQHelper {
 	public static void createDeploymentXml(File outputFile,
 			ArrayList<File> entityList, 
 			String baseDirectory, 
-			TreeMap<String, String> tokens,
-			boolean createImportCommandXml) throws Exception {
+			TreeMap<String, String> tokens) throws Exception {
 		if (logger.isLoggable(Level.FINE)) {
 			logger.entering(IIQHelper.class.getName(), "createDeploymentXml");
 		}
@@ -86,30 +89,23 @@ public class IIQHelper {
 		writeXmlHeader(sw);
 
 		// We want to create an import file instead of concatenating it to a deployable file
-		if (createImportCommandXml) {
-		    // Doing this for every file we of our configuration files
-			for (File file : entityList) {
-				if (logger.isLoggable(Level.FINEST)) {
-					logger.log(Level.FINEST, String.format(
-							"Adding importcommand for file %s", file.getName()));
-				}
-				sw.write(String
-						.format("<ImportAction name='include' value='WEB-INF/config/custom-artifacts/%s'/>%s",
-								file.getAbsoluteFile().toString().replaceAll(
-								        String.format("%s/", baseDirectory), ""),
-								System.getProperty("line.separator")));
-			}
-		} else {
-			for (File file : entityList) {
-				if (logger.isLoggable(Level.FINEST)) {
-					logger.log(
-							Level.FINEST,
-							String.format("Stripping lines for file %s",
-									file.getName()));
-				}
-				stripLines(file, sw, tokens);
-			}
-		}
+        // Doing this for every file we of our configuration files
+        for (File file : entityList) {
+            if (logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST, String.format(
+                        "Adding importcommand for file %s", file.getName()));
+            }
+            
+            stripAttributesCopy(file);
+            
+            // This will write the ImportAction to the XML file
+            sw.write(String
+                    .format("<ImportAction name='include' value='WEB-INF/config/custom-artifacts/%s'/>%s",
+                            file.getAbsoluteFile().toString().replaceAll(
+                                    String.format("%s/", baseDirectory), ""),
+                            System.getProperty("line.separator")));
+        }
+    
 
 		writeXmlFooter(sw);
 
@@ -142,7 +138,41 @@ public class IIQHelper {
 		}
 	}
 
-	/**
+	private static void stripAttributesCopy(File file) throws IOException {
+	    File tempFile = null;
+	    BufferedReader br = null;
+	    BufferedWriter wr = null;
+        try {
+            tempFile = File.createTempFile("identityIQ", String.valueOf(Math.random()));
+            Files.copy(file.toPath(), tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            
+            br = new BufferedReader(new FileReader(tempFile));
+            wr = new BufferedWriter(new FileWriter(file));
+            String line = null;
+            while((line = br.readLine()) != null) {
+                wr.write(String.format("%s%s", 
+                        stripAttributes(line), 
+                        System.getProperty("line.separator")));
+            }
+            
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, e.getMessage());
+            throw new IOException(e);
+        }finally {
+            if(br != null) {
+                br.close();
+            }
+            
+            if(wr != null) {
+                wr.close();
+            }
+            
+            tempFile.delete();
+        }
+        
+    }
+
+    /**
 	 * Writes a standard header and an opened root element to the supplied StringWriter
 	 * @param writer the {@link StringWriter} to be used
 	 */
@@ -235,7 +265,8 @@ public class IIQHelper {
 	 *            a map of tokens
 	 * @throws Exception thrown when there is an exception
 	 */
-	private static void stripLines(File file, Writer writer,
+	@SuppressWarnings("unused")
+    private static void stripLines(File file, Writer writer,
 			TreeMap<String, String> tokens) throws Exception {
 		if (logger.isLoggable(Level.FINE)) {
 			logger.entering(IIQHelper.class.getName(), "stripLines");
