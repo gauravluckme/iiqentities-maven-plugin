@@ -17,7 +17,6 @@ package de.whisperedshouts.plugins.iiqentities;
  */
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -32,11 +31,11 @@ public class GenerateIIQEntityMojo extends AbstractMojo {
 	/**
 	 * Folder where the XML file shall be stored.
 	 *
-	 * @parameter 	property="outputDirectory"
+	 * @parameter 	property="artifactDirectory"
 	 * 				expression=${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/config/custom-artifacts
 	 * @required
 	 */
-	private File outputDirectory;
+	private File artifactDirectory;
 
 	/**
 	 * Name of the XML file
@@ -46,71 +45,40 @@ public class GenerateIIQEntityMojo extends AbstractMojo {
 	 */
 	private String xmlEntityFile;
 
-	/**
-	 * Full path to a token file
-	 *
-	 * @parameter property="tokenFile"
-	 */
-	private File tokenFile;
-
-	/**
-	 * Directory where all XML entities can be found
-	 *
-	 * @parameter property="entityFolder"
-	 * @required
-	 */
-	private File entityFolder;
-
 	/* (non-Javadoc)
 	 * @see org.apache.maven.plugin.Mojo#execute()
 	 */
 	public void execute() throws MojoExecutionException {
 	    // Some debugging output
-		getLog().debug(String.format("Value of Property %s : %s", "outputDirectory", (outputDirectory == null)? "NULL" : outputDirectory));
+		getLog().debug(String.format("Value of Property %s : %s", "outputDirectory", (artifactDirectory == null)? "NULL" : artifactDirectory));
 		getLog().debug(String.format("Value of Property %s : %s", "xmlEntityFile", (xmlEntityFile == null)? "NULL" : xmlEntityFile));
-		getLog().debug(String.format("Value of Property %s : %s", "tokenFile", (tokenFile == null)? "NULL" : tokenFile));
-		getLog().debug(String.format("Value of Property %s : %s", "entityFolder", (entityFolder == null)? "NULL" : entityFolder));
 		
 		// Check if the output directory already exists
 		// If it does not, we are creating it.
-		if (!outputDirectory.exists()) {
-			getLog().debug("created output directory " + outputDirectory);
-			boolean dirCreated = outputDirectory.mkdirs();
+		if (!artifactDirectory.exists()) {
+			getLog().debug("created output directory " + artifactDirectory);
+			boolean dirCreated = artifactDirectory.mkdirs();
 			
 			// If directory creation had not been successfull, we throw a new exception
 			if(!dirCreated) {
 				throw new MojoExecutionException(String.format(
 				        "Directory %s does not exist and could not be created.", 
-				        outputDirectory.getAbsoluteFile()));
-			}
-		}
-		
-		// Check if the tokenFile is available to us
-		if(tokenFile == null || !tokenFile.exists()) {
-		    
-			// creating an empty temp file so that IIQHelper does not break
-			try {
-				tokenFile = File.createTempFile("iiq", "token");
-				tokenFile.deleteOnExit();
-				getLog().info(String.format("Created %s as a temporary file", tokenFile.getAbsolutePath()));
-			} catch (IOException e) {
-				getLog().error(e);
-				throw new MojoExecutionException(e.getMessage(), e);
+				        artifactDirectory.getAbsoluteFile()));
 			}
 		}
 
 		// Initializing the list of files we are going to process
 		ArrayList<File> fileList = null;
 		// Check if the config folder exists. If not we throw a new exception
-		if (entityFolder != null
-				&& !entityFolder.exists()) {
+		if (artifactDirectory != null
+				&& !artifactDirectory.exists()) {
 			throw new MojoExecutionException("entity Folder does not exist!");
 		} 
 		// But if it does, we add all files to the list
 		else {
 			fileList = new ArrayList<File>();
-			getLog().debug("traversing directory " + entityFolder);
-			IIQHelper.traverseDirectory(entityFolder, "xml", fileList);
+			getLog().debug("traversing directory " + artifactDirectory);
+			IIQHelper.traverseDirectory(artifactDirectory, "xml", fileList);
 		}
 
 		// After the list of files has been populated we are going to create
@@ -118,7 +86,7 @@ public class GenerateIIQEntityMojo extends AbstractMojo {
 		try {
 			getLog().info("generating deployment XML: " + xmlEntityFile);
 			File f = new File(String.format("%s%s%s",
-					outputDirectory.getAbsolutePath(),
+			        artifactDirectory.getAbsolutePath(),
 					System.getProperty("file.separator"),
 					xmlEntityFile));
 			getLog().info("Full Path: " + f.getAbsolutePath());
@@ -127,8 +95,7 @@ public class GenerateIIQEntityMojo extends AbstractMojo {
 			IIQHelper.createDeploymentXml(
 					f, 
 					fileList, 
-					entityFolder.getAbsolutePath().toString(),
-					IIQHelper.createTokenMap(tokenFile));
+					artifactDirectory.getAbsolutePath().toString());
 		} catch (Exception e) {
 			getLog().error(e);
 		}

@@ -20,7 +20,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -28,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -49,19 +47,10 @@ public class IIQHelper {
     // A logger. Not much to say about this one
 	private final static Logger logger = Logger.getLogger(IIQHelper.class
 			.getName());
-
-	// These regular expressions are used to strip whole lines from a given file
-	private final static String[] stripLineRegex    = { 
-	        "<\\?xml[ a-zA-Z0-9=\"'.-]*\\?>",
-			"<!DOCTYPE [a-zA-Z]* PUBLIC [\"sailpoint.dtd\" ]{1,}>" 
-	        };
 	
 	// This regular expression is used to remove certain attribute/value pairs
 	// from the given line.
 	private final static String stripAttributeRegex = "(id|created|modified)=[\"']\\w+[\"']";
-	
-	// This regular expression is used to find tokens in a string.
-    private static final String tokenRegex          = "@@@[a-zA-Z0-9-_]*@@@";;
 
 	/**
 	 * Creates a deployable XML artifact
@@ -75,8 +64,7 @@ public class IIQHelper {
 	 */
 	public static void createDeploymentXml(File outputFile,
 			ArrayList<File> entityList, 
-			String baseDirectory, 
-			TreeMap<String, String> tokens) throws Exception {
+			String baseDirectory) throws Exception {
 		if (logger.isLoggable(Level.FINE)) {
 			logger.entering(IIQHelper.class.getName(), "createDeploymentXml");
 		}
@@ -106,7 +94,7 @@ public class IIQHelper {
                             System.getProperty("line.separator")));
         }
     
-
+        // Write a standard XML footer to our file
 		writeXmlFooter(sw);
 
 		try {
@@ -138,7 +126,15 @@ public class IIQHelper {
 		}
 	}
 
+	/**
+	 * Creates a copy of a file, stripped of all corrupting attributes
+	 * @param file the file to be copied and stripped
+	 * @throws IOException whenever there was an error with the I/O
+	 */
 	private static void stripAttributesCopy(File file) throws IOException {
+	    if (logger.isLoggable(Level.FINE)) {
+            logger.entering(IIQHelper.class.getName(), "stripAttributesCopy");
+        }
 	    File tempFile = null;
 	    BufferedReader br = null;
 	    BufferedWriter wr = null;
@@ -170,6 +166,9 @@ public class IIQHelper {
             tempFile.delete();
         }
         
+        if (logger.isLoggable(Level.FINE)) {
+            logger.exiting(IIQHelper.class.getName(), "stripAttributesCopy");
+        }
     }
 
     /**
@@ -256,95 +255,6 @@ public class IIQHelper {
 	}
 
 	/**
-	 * Strips some lines from the file that we do not want to include
-	 * @param file
-	 *            the file to be used
-	 * @param writer
-	 *            a Writer object
-	 * @param tokens
-	 *            a map of tokens
-	 * @throws Exception thrown when there is an exception
-	 */
-	@SuppressWarnings("unused")
-    private static void stripLines(File file, Writer writer,
-			TreeMap<String, String> tokens) throws Exception {
-		if (logger.isLoggable(Level.FINE)) {
-			logger.entering(IIQHelper.class.getName(), "stripLines");
-		}
-
-		BufferedReader br = null;
-		try {
-			if (logger.isLoggable(Level.FINE)) {
-				logger.log(Level.FINE, String.format(
-						"Creating BufferedReader of file %s", file.getName()));
-			}
-			br = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")));
-			String line;
-			while ((line = br.readLine()) != null) {
-				boolean allowedLine = true;
-				for (String s : IIQHelper.stripLineRegex) {
-					if (line.matches(s)) {
-						allowedLine = false;
-						break;
-					}
-				}
-				if (allowedLine) {
-					if (logger.isLoggable(Level.FINE)) {
-						logger.log(Level.FINE, "stripping ids");
-					}
-					String allowed = stripAttributes(String.format("%s%s", line,
-							System.getProperty("line.separator")));
-
-					
-					if (logger.isLoggable(Level.FINE)) {
-						logger.log(
-								Level.FINE,
-								String.format(
-										"Creating pattern matcher with regex %s",
-										IIQHelper.tokenRegex));
-					}
-					Pattern p = Pattern.compile(IIQHelper.tokenRegex);
-					Matcher m = p.matcher(allowed);
-					while (m.find()) {
-						String token = m.group();
-						if (logger.isLoggable(Level.FINEST)) {
-							logger.log(Level.FINEST,
-									String.format("Found token %s", token));
-						}
-						if (tokens.containsKey(token)) {
-							allowed = allowed.replaceAll(token,
-									tokens.get(token));
-						}
-					}
-
-					if (logger.isLoggable(Level.FINE)) {
-						logger.log(Level.FINE, "appending line");
-					}
-					writer.write(allowed);
-
-				}
-			}
-		} catch (FileNotFoundException e) {
-			logger.log(Level.SEVERE, e.getMessage());
-			throw new Exception(e);
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, e.getMessage());
-			throw new Exception(e);
-		} finally {
-			if (logger.isLoggable(Level.FINE)) {
-				logger.log(Level.FINE, "Trying to close BufferedReader");
-			}
-			if (br != null) {
-				br.close();
-			}
-		}
-
-		if (logger.isLoggable(Level.FINE)) {
-			logger.exiting(IIQHelper.class.getName(), "stripLines");
-		}
-	}
-
-	/**
 	 * traverses a Directory and returns the supplied ArrayList containing matching files
 	 * @param pathObject
 	 *            the path to be used
@@ -413,6 +323,7 @@ public class IIQHelper {
 	 * @return a {@link TreeMap} containing tokens
 	 * @throws Exception if anything cannot be caught correct
 	 */
+	@Deprecated
 	public static TreeMap<String, String> createTokenMap(File tokenFile) throws Exception {
 		if (logger.isLoggable(Level.FINE)) {
 			logger.entering(IIQHelper.class.getName(), "createTokenMap");
